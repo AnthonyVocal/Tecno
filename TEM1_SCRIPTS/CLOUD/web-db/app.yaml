@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-storage-claim
+spec:
+  resources:
+    requests:
+      storage: 3Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: web-storage
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath: 
+    path: "/home/ocontreras/Kubernetes/web-db/php_app"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flask-storage-claim
+spec:
+  resources:
+    requests:
+      storage: 3Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: flask-storage
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath: 
+    path: "/home/ocontreras/Kubernetes/web-db/flask_app"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-db-deployment
+spec:
+  selector:
+    matchLabels:
+      app: web-db
+  template:
+    metadata:
+      labels:
+        app: web-db
+    spec:
+      volumes:
+        - name: web-storage
+          persistentVolumeClaim:
+            claimName: web-storage-claim
+        - name: flask-storage
+          persistentVolumeClaim:
+            claimName: flask-storage-claim
+      containers:
+      - name: web-db
+        image: ocontreras/tem1db
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+      - name: web-apache
+        image: ocontreras/tem1web
+        volumeMounts:
+          - mountPath: /var/www/html
+            name: web-storage
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      - name: web-flask
+        image: ocontreras/tem1flask
+        volumeMounts:
+          - mountPath: /opt/app
+            name: flask-storage
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-db-service
+spec:
+  type: ClusterIP
+  selector:
+    app: web-db
+  ports:
+  - name: "mysql"
+    port: 8306
+    targetPort: 3306
+  - name: "apache"
+    port: 8080
+    targetPort: 80
+  - name: "flask"
+    port: 9080
+    targetPort: 81

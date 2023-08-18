@@ -1,0 +1,4 @@
+#!/bin/bash
+apt-get update
+apt-get install -y pkgconf python3-dev default-libmysqlclient-dev build-essential
+apt-get install -y python3-pip

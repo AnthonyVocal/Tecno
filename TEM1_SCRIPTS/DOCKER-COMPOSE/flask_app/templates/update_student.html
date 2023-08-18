@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+<div class="container">
+  <br>
+  <h1>Edit Student</h1>
+  <br>
+  <form action="/students" method="POST">
+    <div class="mb-3">
+      <label for="name" class="form-label">First Name</label>
+      <input type="text" value="{{ student.first_name }}" class="form-control" id="first_name" name="first_name">
+    </div>
+    <div class="mb-3">
+      <label for="name" class="form-label">Last Name</label>
+      <input type="text" value="{{ student.last_name }}" class="form-control" id="last_name" name="last_name">
+    </div>
+    <div class="mb-3">
+      <label for="city" class="form-label">City</label>
+      <input type="text" value="{{ student.city }}" class="form-control" id="city" name="city">
+    </div>
+    <div class="mb-3">
+      <label for="semester" class="form-label">Semester</label>
+      <input type="text" class="form-control" value="{{ student.semester }}" id="semester" name="semester">
+    </div>
+    
+    <input type="text" value="{{ student.id }}" id="id" name="id" hidden="true">
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+
+{% endblock %}
